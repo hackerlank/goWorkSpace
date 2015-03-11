@@ -15,6 +15,9 @@ import (
     "github.com/hu17889/go_spider/core/pipeline"
     "github.com/hu17889/go_spider/core/spider"
     "strings"
+
+	"time"
+	"github.com/hu17889/go_spider/core/common/mlog"
 )
 
 type MyPageProcesser struct {
@@ -32,12 +35,23 @@ func (this *MyPageProcesser) Process(p *page.Page) {
         return
     }
 
+
+	startTime := time.Now().String()
+	mlog.StraceInst().Println("repo-list-name: " + startTime)
+
+
     query := p.GetHtmlParser()
     var urls []string
     query.Find("h3[class='repo-list-name'] a").Each(func(i int, s *goquery.Selection) {
         href, _ := s.Attr("href")
         urls = append(urls, "http://github.com/"+href)
     })
+
+
+	endTime := time.Now().String()
+	mlog.StraceInst().Println(endTime)
+
+
     // these urls will be saved and crawed by other coroutines.
     p.AddTargetRequests(urls, "html")
 
@@ -62,6 +76,6 @@ func main() {
     spider.NewSpider(NewMyPageProcesser(), "TaskName").
         AddUrl("https://github.com/hu17889?tab=repositories", "html"). // Start url, html is the responce type ("html" or "json" or "jsonp" or "text")
         AddPipeline(pipeline.NewPipelineConsole()).                    // Print result on screen
-        SetThreadnum(3).                                               // Crawl request by three Coroutines
+        SetThreadnum(200).                                               // Crawl request by three Coroutines
         Run()
 }
