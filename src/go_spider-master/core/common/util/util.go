@@ -5,6 +5,8 @@ import (
     "os"
     "regexp"
     "strings"
+	"runtime"
+	"fmt"
 )
 
 // JsonpToJson modify jsonp string to json string
@@ -64,4 +66,25 @@ func IsFileExists(path string) bool {
 func IsNum(a string) bool {
     reg, _ := regexp.Compile("^\\d+$")
     return reg.MatchString(a)
+}
+
+
+
+
+
+func Panicable(error error) {
+	if error != nil {
+		panic(error)
+	}
+}
+
+func FN() string {
+	pc := make([]uintptr, 10)
+	runtime.Callers(3, pc)
+	f := runtime.FuncForPC(pc[0])
+	return f.Name()
+}
+
+func Printf(words string) {
+	fmt.Printf("@%v@  %v\n", FN(), words)
 }
