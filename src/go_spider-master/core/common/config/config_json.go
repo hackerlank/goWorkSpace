@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"github.com/bitly/simplejson"
+	"reflect"
+	"fmt"
 )
 
 func GetSpecConfig(filename string, keys ...string) (string, error) {
@@ -22,6 +24,20 @@ func GetSpecConfig(filename string, keys ...string) (string, error) {
 
 
 
+func ShowParseJsonMap(jsonBodyMap map[string]interface {}) {
+	for _, v := range jsonBodyMap {
+		switch reflect.ValueOf(v).Kind() {
+		case reflect.Map:
+			ShowParseJsonMap(v.(map[string]interface {}))
+		case reflect.String:
+			fmt.Printf("%v\n", v)
+		}
+	}
+}
+
+
+
+
 // ###
 func getJsonFile(filename string) ([]byte, error) {
 	absFilePath, err := filepath.Abs(filename)
@@ -35,7 +51,7 @@ func getJsonBody(jsonText []byte) (*simplejson.Json, error) {
 	return simplejson.NewJson(jsonText)
 }
 // ###
-func getByKeys(jsonBody *simplejson.Json, keys []string) (string, error)  {
+func getByKeys(jsonBody *simplejson.Json, keys []string) (string, error) {
 	for _, v := range keys {
 		jsonBody = jsonBody.Get(string(v))
 	}

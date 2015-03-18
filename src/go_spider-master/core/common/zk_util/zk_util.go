@@ -4,9 +4,11 @@ import (
 	"github.com/samuel/go-zookeeper/zk"
 	"go_spider-master/core/common/config"
 	"go_spider-master/core/common/util"
+	"github.com/bitly/simplejson"
 	"fmt"
 	"time"
 	"strings"
+//	"reflect"
 )
 
 type zk_util struct {
@@ -132,11 +134,26 @@ func main() {
 	zkUtil := zk_util{}
 	zkUtil.Connect()
 
-	zkUtil.CreateEphemeralPathIfNotExist(config.ZK_CRAWLER_ROOT)
+	zkUtil.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_DP_PATH)
 
-	zkUtil.SetPathData(config.ZK_CRAWLER_ROOT, "hahahahahahahahaabc")
 
-	fmt.Println(string(zkUtil.GetPathData(config.ZK_CRAWLER_ROOT)))
+	//json example string for testing
+	js, err := simplejson.NewJson([]byte("{}"))
+	util.Panicable(err)
+	js.Set("rootpath1", "rootpathvalue1")
+	js.SetPath([]string{"path1", "path2"}, "pathvalue")
+	js.SetPath([]string{"path1", "path3", "path4"}, "path3value")
+	testJson, err := js.Map()
 
-	zkUtil.DeletePath(config.ZK_CRAWLER_ROOT)
+	config.ShowParseJsonMap(testJson)
+
+//	testJsonStr := fmt.Sprintf("%v", testJson)
+	testJsonStr, _ := js.MarshalJSON()
+
+
+	zkUtil.SetPathData(config.ZK_CRAWLER_DP_PATH, string(testJsonStr))
+
+	fmt.Println(string(zkUtil.GetPathData(config.ZK_CRAWLER_DP_PATH)))
+
+	zkUtil.DeletePath(config.ZK_CRAWLER_DP_PATH)
 }
