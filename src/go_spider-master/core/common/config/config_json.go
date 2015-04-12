@@ -21,9 +21,6 @@ func GetSpecConfig(filename string, keys ...string) (string, error) {
 	return getByKeys(jsonBody, keys)
 }
 
-
-
-
 func ShowParseJsonMap(jsonBodyMap map[string]interface {}) {
 	for _, v := range jsonBodyMap {
 		switch reflect.ValueOf(v).Kind() {
@@ -34,6 +31,7 @@ func ShowParseJsonMap(jsonBodyMap map[string]interface {}) {
 		}
 	}
 }
+
 
 
 

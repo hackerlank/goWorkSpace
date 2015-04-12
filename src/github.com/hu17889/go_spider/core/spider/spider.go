@@ -135,7 +135,7 @@ func (this *Spider) Run() {
             break
         } else if req == nil {
             time.Sleep(500 * time.Millisecond)
-            //mlog.StraceInst().Println("scheduler is empty")
+            mlog.StraceInst().Println("scheduler is empty")
             continue
         }
         this.mc.GetOne()

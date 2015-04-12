@@ -1,8 +1,15 @@
 package config
 
 const (
-	CONF_FILE_PATH = "src/go_spider-master/core/config.json"
-	ZK_CRAWLER_ROOT = "/dspider"
+	CONF_FILE_PATH = "core/config.json"
+	ZK_CRAWLER_ROOT_PATH = "/dspider"
+	ZK_CRAWLER_MASTER_PATH = "/dspider/master"
+	ZK_CRAWLER_SCHEDULER_PATH = "/dspider/scheduler"
 	ZK_CRAWLER_DP_PATH = "/dspider/dp"
+	ZK_CRAWLER_SINK_PATH = "/dspider/sink"
 
+	ZK_CRAWLER_MASTER_HEARTBEAT = 60
+	ZK_CRAWLER_SCHEDULER_HEARTBEAT = 60
+	ZK_CRAWLER_DP_HEARTBEAT = 60
+	ZK_CRAWLER_SINK_HEARTBEAT = 60
 )

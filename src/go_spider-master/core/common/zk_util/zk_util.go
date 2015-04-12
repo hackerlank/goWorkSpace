@@ -1,4 +1,4 @@
-package main
+package zk_util
 
 import (
 	"github.com/samuel/go-zookeeper/zk"
@@ -11,14 +11,14 @@ import (
 //	"reflect"
 )
 
-type zk_util struct {
+type Zk_util struct {
 	conn			*zk.Conn
 	flag			int32
 	ephemeralflag	int32
 	acl				[]zk.ACL
 }
 
-func (this *zk_util) Connect() *zk_util {
+func (this *Zk_util) Connect() *Zk_util {
 	zkHosts, err := config.GetSpecConfig(config.CONF_FILE_PATH, "zookeeper", "hosts")
 	util.Panicable(err)
 	zks := strings.Split(zkHosts, ",")
@@ -32,7 +32,7 @@ func (this *zk_util) Connect() *zk_util {
 	return this
 }
 
-func (this *zk_util) createPathIfNotExist(dest string, ephemeral bool) *zk_util {
+func (this *Zk_util) createPathIfNotExist(dest string, ephemeral bool) *Zk_util {
 	if dest == "/" {
 		util.Printf("reach root node!")
 		return nil
@@ -63,15 +63,15 @@ func (this *zk_util) createPathIfNotExist(dest string, ephemeral bool) *zk_util 
 	return this
 }
 
-func (this *zk_util) CreatePermanentPathIfNotExist(dest string) *zk_util {
+func (this *Zk_util) CreatePermanentPathIfNotExist(dest string) *Zk_util {
 	return this.createPathIfNotExist(dest, false)
 }
 
-func (this *zk_util) CreateEphemeralPathIfNotExist(dest string) *zk_util {
+func (this *Zk_util) CreateEphemeralPathIfNotExist(dest string) *Zk_util {
 	return this.createPathIfNotExist(dest, true)
 }
 
-func (this *zk_util) SetPathData(dest string, value string) *zk_util {
+func (this *Zk_util) SetPathData(dest string, value string) *Zk_util {
 	_, stat, err := this.conn.Get(dest)
 
 //	destExists, _, _ := this.conn.Exists(dest)
@@ -91,7 +91,7 @@ func (this *zk_util) SetPathData(dest string, value string) *zk_util {
 }
 
 // data format: json
-func (this *zk_util) GetPathData(dest string) []byte {
+func (this *Zk_util) GetPathData(dest string) []byte {
 	destExists, _, _ := this.conn.Exists(dest)
 	if destExists == false {
 		util.Printf(fmt.Sprintf("dest: %v NOT exists", dest))
@@ -104,7 +104,7 @@ func (this *zk_util) GetPathData(dest string) []byte {
 	return dataRes
 }
 
-func (this *zk_util) DeletePath(dest string) *zk_util {
+func (this *Zk_util) DeletePath(dest string) *Zk_util {
 	err := this.conn.Delete(dest, -1)
 	if err != nil {
 		util.Printf(fmt.Sprintf("dest: %v MAY NOT exists", dest))
@@ -114,24 +114,32 @@ func (this *zk_util) DeletePath(dest string) *zk_util {
 }
 
 
-
-
-
-func (this *zk_util) GetDP() *zk_util {
-	exists, stat, err := this.conn.Exists(config.ZK_CRAWLER_DP_PATH)
-	util.Panicable(err)
-	fmt.Println(exists, stat.Version)
-	if false == exists {
-		panic("ZK_DP_PATH not exist!")
-		return nil
-	}
-	return this
+// create path of following nodes
+func (this *Zk_util) CreateMaster() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_MASTER_PATH)
 }
+func (this *Zk_util) CreateDP() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_DP_PATH)
+}
+
+// get data of following nodes
+func (this *Zk_util) GetMaster() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_MASTER_PATH)
+}
+func (this *Zk_util) GetDP() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_DP_PATH)
+}
+
+// set data of following nodes
+func (this *Zk_util) setMaster(data []byte) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_MASTER_PATH, data)
+}
+func (this *Zk_util) setDP()
 
 
 
 func main() {
-	zkUtil := zk_util{}
+	zkUtil := Zk_util{}
 	zkUtil.Connect()
 
 	zkUtil.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_DP_PATH)
