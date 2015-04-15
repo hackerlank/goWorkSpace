@@ -9,6 +9,7 @@ import (
 	"time"
 	"strings"
 //	"reflect"
+	"strconv"
 )
 
 type Zk_util struct {
@@ -54,7 +55,7 @@ func (this *Zk_util) createPathIfNotExist(dest string, ephemeral bool) *Zk_util 
 		var flag int32
 		if ephemeral == false {flag = this.flag} else {flag = this.ephemeralflag}
 
-		_, err := this.conn.Create(dest, []byte("happy"), flag, this.acl)
+		_, err := this.conn.Create(dest, []byte(""), flag, this.acl)
 		if nil != err {
 			panic(err)
 		}
@@ -115,26 +116,110 @@ func (this *Zk_util) DeletePath(dest string) *Zk_util {
 
 
 // create path of following nodes
+// 1. master
 func (this *Zk_util) CreateMaster() *Zk_util {
 	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_MASTER_PATH)
 }
-func (this *Zk_util) CreateDP() *Zk_util {
+func (this *Zk_util) CreateMasterHeartbeat() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_MASTER_HEARTBEAT_PATH)
+}
+// 2. scheduler
+func (this *Zk_util) CreateScheduler() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_SCHEDULER_PATH)
+}
+func (this *Zk_util) CreateSchedulerHeartbeat() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_SCHEDULER_HEARTBEAT_PATH)
+}
+// 3. dp
+func (this *Zk_util) CreateDPStat() *Zk_util {
 	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_DP_PATH)
+}
+func (this *Zk_util) CreateDP(id int) *Zk_util {
+	path := config.ZK_CRAWLER_DP_PATH + "/" + strconv.Itoa(id)
+	return this.CreatePermanentPathIfNotExist(path)
+}
+func (this *Zk_util) CreateDPHeartbeat(id int) *Zk_util {
+	path := config.ZK_CRAWLER_DP_PATH + "/" + strconv.Itoa(id) + "/heartbeat"
+	return this.CreatePermanentPathIfNotExist(path)
+}
+// 4. sink
+func (this *Zk_util) CreateSink() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_SINK_PATH)
+}
+func (this *Zk_util) CreateSinkHeartbeat() *Zk_util {
+	return this.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_SINK_HEARTBEAT_PATH)
 }
 
 // get data of following nodes
+// 1. master
 func (this *Zk_util) GetMaster() []byte {
 	return this.GetPathData(config.ZK_CRAWLER_MASTER_PATH)
 }
-func (this *Zk_util) GetDP() []byte {
+func (this *Zk_util) GetMasterHeartbeat() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_MASTER_HEARTBEAT_PATH)
+}
+// 2. scheduler
+func (this *Zk_util) GetScheduler() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_SCHEDULER_PATH)
+}
+func (this *Zk_util) GetSchedulerHeartbeat() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_SCHEDULER_HEARTBEAT_PATH)
+}
+// 3. dp
+func (this *Zk_util) GetDPStat() []byte {
 	return this.GetPathData(config.ZK_CRAWLER_DP_PATH)
+}
+func (this *Zk_util) GetDP(id int) []byte {
+	path := config.ZK_CRAWLER_DP_PATH + "/" + strconv.Itoa(id)
+	return this.GetPathData(path)
+}
+func (this *Zk_util) GetDPHeartbeat(id int) []byte {
+	path := config.ZK_CRAWLER_DP_PATH + "/" + strconv.Itoa(id) + "/heartbeat"
+	return this.GetPathData(path)
+}
+// 4. sink
+func (this *Zk_util) GetSink() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_SINK_PATH)
+}
+func (this *Zk_util) GetSinkHeartbeat() []byte {
+	return this.GetPathData(config.ZK_CRAWLER_SINK_HEARTBEAT_PATH)
 }
 
 // set data of following nodes
-func (this *Zk_util) setMaster(data []byte) *Zk_util {
-	return this.SetPathData(config.ZK_CRAWLER_MASTER_PATH, data)
+// 1. master
+func (this *Zk_util) SetMaster(data []byte) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_MASTER_PATH, string(data))
 }
-func (this *Zk_util) setDP()
+func (this *Zk_util) UpMasterHeartBeat(ts int64) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_MASTER_HEARTBEAT_PATH, strconv.Itoa(int(ts)))
+}
+// 2. scheduler
+func (this *Zk_util) SetScheduler(data []byte) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_SCHEDULER_PATH, string(data))
+}
+func (this *Zk_util) UpSchedulerHeartBeat(ts int64) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_SCHEDULER_HEARTBEAT_PATH, strconv.Itoa(int(ts)))
+}
+// 3. dp
+func (this *Zk_util) SetDPStat(data []byte) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_DP_PATH, string(data))
+}
+func (this *Zk_util) SetDP(id int, data []byte) *Zk_util {
+	path := config.ZK_CRAWLER_DP_PATH + "/" + strconv.Itoa(id)
+	return this.SetPathData(path, string(data))
+}
+func (this *Zk_util) UpDPHeartBeat(id int, ts int64) *Zk_util {
+	path := config.ZK_CRAWLER_DP_PATH + "/" + strconv.Itoa(id) + "/heartbeat"
+	return this.SetPathData(path, strconv.Itoa(int(ts)))
+}
+// 4. sink
+func (this *Zk_util) SetSink(data []byte) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_SINK_PATH, string(data))
+}
+func (this *Zk_util) UpSinkHeartBeat(ts int64) *Zk_util {
+	return this.SetPathData(config.ZK_CRAWLER_SINK_HEARTBEAT_PATH, strconv.Itoa(int(ts)))
+}
+
 
 
 
@@ -143,7 +228,6 @@ func main() {
 	zkUtil.Connect()
 
 	zkUtil.CreatePermanentPathIfNotExist(config.ZK_CRAWLER_DP_PATH)
-
 
 	//json example string for testing
 	js, err := simplejson.NewJson([]byte("{}"))
@@ -157,7 +241,6 @@ func main() {
 
 //	testJsonStr := fmt.Sprintf("%v", testJson)
 	testJsonStr, _ := js.MarshalJSON()
-
 
 	zkUtil.SetPathData(config.ZK_CRAWLER_DP_PATH, string(testJsonStr))
 
